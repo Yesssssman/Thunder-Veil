@@ -11,7 +11,7 @@ namespace ThunderVeil.Gameplay
     ///
     /// Systems 컴포넌트에서 사용
     ///
-    /// 게임 핵심 로직들(사격 재사용 대기시간, AI 상태간 대기 시간 등)은 FixedUpdate에서 관리하며
+    /// 게임플레이 로직들(사격 재사용 대기시간, AI 상태간 대기 시간 등)은 FixedUpdate에서 관리하며
     /// 이는 의도된 시간만큼 동작하도록 하기 위함.
     /// </summary>
     [DefaultExecutionOrder(-1000)]
@@ -23,22 +23,33 @@ namespace ThunderVeil.Gameplay
         private GameManager() {}
 
         [Header("Input")]
-        [SerializeField] private InputActionAsset controls;
+        [SerializeField]
+        private InputActionAsset controls;
 
         [Header("Audio")]
-        [SerializeField] private AudioMixer mixer;
-        [SerializeField] private AudioSource ambientSource;   // 빗소리
-        [SerializeField] private AudioSource sfxSource;       // one-shots: siren / victory
-        [SerializeField] private AudioClip sirenClip;         // 패배
-        [SerializeField] private AudioClip victoryClip;       // 승리
+        [SerializeField]
+        private AudioMixer mixer;
+
+        [SerializeField]
+        private AudioSource ambientSource;   // 빗소리
+
+        [SerializeField]
+        private AudioSource sfxSource;       // one-shots: siren / victory
+
+        [SerializeField]
+        private AudioClip sirenClip;         // 패배
+
+        [SerializeField]
+        private AudioClip victoryClip;       // 승리
 
         [Header("UI")]
         [SerializeField] private GameObject victoryPanel;     // 승리 로고
         [SerializeField] private GameObject defeatPanel;      // 패배 로고
 
         [Header("Play area")]
-        [Tooltip("따로 설정하지 않을 시 런타임에 'Background' 스프라이트를 찾아 자동 바인딩")]
+        [Tooltip("따로 설정하지 않을 시 런타임에 'Background' 스프라이트를 찾아 바인딩")]
         [SerializeField] private SpriteRenderer backgroundRenderer;
+
         [Tooltip("따로 설정하지 않을 시 Main Camera를 사용")]
         [SerializeField] private Camera gameCamera;
 
@@ -106,7 +117,7 @@ namespace ThunderVeil.Gameplay
             if (backgroundRenderer != null)
                 PixelWorld.ConfigureFromBounds(backgroundRenderer.bounds);
 
-            // 
+            //
             if (gameCamera != null && gameCamera.orthographic)
             {
                 Vector3 c = PixelWorld.AreaCenterWorld;

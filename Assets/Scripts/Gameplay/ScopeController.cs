@@ -14,36 +14,39 @@ namespace ThunderVeil.Gameplay
         [SerializeField]
         private Transform screenLayer;
 
-        [FormerlySerializedAs("scopeReticle")] [SerializeField]
+        [FormerlySerializedAs("scopeReticle")]
+        [SerializeField]
         private Transform scopeDecal;
 
         [SerializeField]
         private FiringSystem firing;
+
+        [SerializeField]
+        private SpriteRenderer backgroundSprite;
 
         [FormerlySerializedAs("worldZoom")]
         [Header("Tuning")]
 
         [SerializeField]
         [Tooltip("스코프 기본 배율")]
-        private float scopeZoom = 1.5f;
+        private float scopeZoom = 1.0f;
 
-        // 스크린 대각선 거리 제곱 (스코프->커서 위치 거리 기반 보간에 사용됨)
-        private float _diagonalLengthSquare;
+        // 카메라의 focal point (픽셀 값 기준, background boundary 처리를 위해 픽셀 값으로 잡는게 유리)
+        private Vector2 _cameraFocal;
 
-        // 마우스 커서의 위치 in pixel coordinate (정확한 픽셀 값을 추적하기 위함)
-        private Vector2 _cursor;
+        // 최대, 최소값 of 배경 스프라이트 (in pixels unit)
+        private Vector2 _bgSizeInPixel;
 
-        // 스코프 위치 (보간)
-        public Vector2 ScopeCenter { get; private set; }
+        // 최대, 최소값 of 스코프 스프라이트 (in pixels unit)
+        private Vector2 _scopeSizeInPixel;
 
         private Camera _camera;
-        private int _widthPixel;
-        private int _heightPixel;
 
         private void Start()
         {
-            _cursor = new(0.0F, 0.0F);
-            ScopeCenter = _cursor;
+            var background = GameObject.Find("Background");
+            if (background == null) return;
+
             _camera = Camera.main;
 
             if (screenLayer == null)
@@ -56,22 +59,30 @@ namespace ThunderVeil.Gameplay
                 }
             }
 
-            var background = GameObject.Find("Background");
+            var scope = screenLayer.Find("ScopeReticle");
 
-            if (background != null)
+            // 스코프 가로, 세로 픽셀 사이즈 구하기
+            if (scope != null && scope.TryGetComponent<SpriteRenderer>(out var scopeRenderer))
             {
-                var spriteRenderer = background.GetComponent<SpriteRenderer>();
+                var bounds = scopeRenderer.bounds;
 
-                // 스프라이트의 가로/세로 픽셀 크기
-                Vector2 worldSize = spriteRenderer.sprite.bounds.size;
-                _widthPixel = (int)Math.Round(worldSize.x * spriteRenderer.sprite.pixelsPerUnit * background.transform.lossyScale.x);
-                _heightPixel = (int)Math.Round(worldSize.y * spriteRenderer.sprite.pixelsPerUnit * background.transform.lossyScale.y);
+                _scopeSizeInPixel = new Vector2(
+                    bounds.size.x * 0.5F * scopeRenderer.sprite.pixelsPerUnit,
+                    bounds.size.y * 0.5F * scopeRenderer.sprite.pixelsPerUnit
+                );
             }
-            else
+
+            if (background != null && background.TryGetComponent<SpriteRenderer>(out var bgRenderer))
             {
-                // 기본 사이즈 (1280^2 * 720^2, 비정상 실행)
-                _widthPixel = 1280;
-                _heightPixel = 720;
+                backgroundSprite = bgRenderer;
+                var bounds = bgRenderer.bounds;
+
+                _bgSizeInPixel = new Vector2(
+                    bounds.size.x * bgRenderer.sprite.pixelsPerUnit,
+                    bounds.size.y * bgRenderer.sprite.pixelsPerUnit
+                );
+
+                _cameraFocal = new(_bgSizeInPixel.x / 2, _bgSizeInPixel.y / 2);
             }
         }
 
@@ -84,28 +95,56 @@ namespace ThunderVeil.Gameplay
             // 카메라 줌인 & 위치 이동 (스코프 포커싱)
             float zoom = Mathf.Clamp(scopeZoom, 0.01F, 4F);
 
-            // 가시 공간 높이(orthographic * 2) 설정 by zoom-in scale
-            _camera.orthographicSize = 1F / zoom;
+            // 가시 공간 설정 (orthographic * 2 == Visible area height)
+            _camera.orthographicSize = 2.5F / zoom;
 
-            // 마우스 델타값(움직임)으로 화면 상에 foucs된 픽셀 위치를 설정
-            _cursor += gm.Look.ReadValue<Vector2>() * (1 / scopeZoom);
-            _cursor.x = Math.Clamp(_cursor.x, 200, _widthPixel - 200); // scope vignette pixel estimated 200px.
-            _cursor.y = Math.Clamp(_cursor.y, 200, _heightPixel - 200);
+            float PPU = backgroundSprite.sprite.pixelsPerUnit;
 
-            _camera.ScreenToWorldPoint(new Vector3(_cursor.x, _cursor.y));
+            // 가시 부피의 가로, 세로의 절반 길이 (픽셀 단위)
+            float viewVolumeWidth = _camera.orthographicSize * PPU * _camera.aspect;
+            float viewVolumeHeight = _camera.orthographicSize * PPU;
 
+            // 마우스 움직임 입력, 줌값 기준으로 포인터 이동 속도 줄이기
+            _cameraFocal += gm.Look.ReadValue<Vector2>() * (2.0F / scopeZoom);
+            _cameraFocal = new Vector2(
+                Math.Clamp(_cameraFocal.x, viewVolumeWidth, _bgSizeInPixel.x - viewVolumeWidth),
+                Math.Clamp(_cameraFocal.y, viewVolumeHeight, _bgSizeInPixel.y - viewVolumeHeight)
+            );
+
+            var bounds = backgroundSprite.bounds;
+
+            // 픽셀 좌표 => 월드 좌표 변환
+            float focalWorldX = bounds.min.x + bounds.size.x * (_cameraFocal.x / _bgSizeInPixel.x);
+            float focalWorldY = bounds.min.y + bounds.size.y * (_cameraFocal.y / _bgSizeInPixel.y);
+
+            // 카메라 포커스
+            _camera.transform.position = new Vector3(
+                focalWorldX, focalWorldY, _camera.transform.position.z
+            );
+
+            // 스코프 포커스
+            scopeDecal.transform.position = new Vector3(
+                focalWorldX, focalWorldY, scopeDecal.transform.position.z
+            );
+
+            Debug.Log($"WTF {_cameraFocal.x} {_cameraFocal.y}");
+
+            /*
             Vector3 pivot = _cursor;
-
             Vector3 p = pivot + -pivot / zoom;
+
             _camera.transform.position = new Vector3(
                 p.x,
                 p.y,
                 _camera.transform.position.z
             );
+            */
         }
 
+        /*
         private void FixedUpdate()
         {
+
             Vector2 scopeCenter = ScopeCenter;
             Vector2 cursor = _cursor;
             Vector2 diff = cursor - scopeCenter;
@@ -119,8 +158,9 @@ namespace ThunderVeil.Gameplay
 
         private void LateUpdate()
         {
-            if (scopeDecal != null)
-                scopeDecal.position = ScopeCenter;
+            // if (scopeDecal != null)
+            //    scopeDecal.position = ScopeCenter;
         }
+        */
     }
 }
