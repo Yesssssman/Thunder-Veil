@@ -1,4 +1,5 @@
 {
+    "version": 1,
     "name": "SniperControls",
     "maps": [
         {
@@ -36,17 +37,26 @@
                     "name": "ToggleIndicators",
                     "type": "Button",
                     "id": "8f1a0000-0000-4000-8000-000000000013",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Zoom",
+                    "type": "Value",
+                    "id": "bf657faf-9965-4378-915a-8032616c7efd",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
                 {
                     "name": "",
                     "id": "8f1a0000-0000-4000-8000-000000000020",
-                    "path": "<Pointer>/position",
+                    "path": "<Mouse>/delta",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -106,6 +116,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "ToggleIndicators",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "74e13124-b9f4-401d-8c54-1f00dcb117f4",
+                    "path": "<Mouse>/scroll/y",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Zoom",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
