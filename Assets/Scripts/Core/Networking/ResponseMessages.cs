@@ -71,5 +71,13 @@ namespace Core.Networking.Util
         {
             return msg is CommonMessages.CONNECTION_ERROR;
         }
+
+        /// <summary>
+        /// 서버 연결에 실패했는지 여부 반환 — 서버가 다운됐거나 디바이스가 오프라인
+        /// </summary>
+        public static bool IsAccessTokenExpired(string msg)
+        {
+            return msg is GameStartMessages.INVALID_ACCESS_TOKEN or GameStartMessages.ACCESS_TOKEN_EXPIRED;
+        }
     }
 }

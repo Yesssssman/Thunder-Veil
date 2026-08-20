@@ -194,16 +194,13 @@ namespace Core.Networking
                 return dto;
             }
 
-            if (dto.responseMessage == GameStartMessages.ACCESS_TOKEN_EXPIRED
-                     || dto.responseMessage == GameStartMessages.INVALID_ACCESS_TOKEN)
+            if (ResponseMessageUtil.IsAccessTokenExpired(dto.responseMessage))
             {
                 // Access 토큰 만료 — Refresh 토큰으로 재발급 시도
                 GameUserResponseDTO response = await RefreshAccessToken();
 
-                if (response.responseMessage == RefreshTokenMessages.OK)
+                if (ResponseMessageUtil.IsOk(response.responseMessage))
                 {
-                    Debug.Log("Logged in by Refresh Token.");
-
                     sAccessToken = response.accessToken;
                     sRefreshToken = response.refreshToken;
 
@@ -225,7 +222,7 @@ namespace Core.Networking
             return dto;
         }
 
-        // `GameStart` 호출은 `AutoLogIn`에서 자동으로 처리
+        // Hidden API — `GameStart` 호출은 `AutoLogIn`에서 자동으로 처리해줌
         private static async Awaitable<GameUserResponseDTO> GameStart()
         {
             // 이미 로그인한 경우

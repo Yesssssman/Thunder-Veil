@@ -81,7 +81,7 @@ namespace Content.UserInterface
             }
             else
             {
-                waringScreenBackend.SetTitleText("Sign Up Succeeded");
+                waringScreenBackend.SetTitleText("Sign Up Failed");
                 waringScreenBackend.setMessageText(result.responseMessage);
             }
         }
