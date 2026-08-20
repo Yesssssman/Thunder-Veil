@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Content
 {
@@ -8,9 +7,12 @@ namespace Content
     /// </summary>
     public class ScopeController : MonoBehaviour
     {
-        [Header("Refs")] [SerializeField] private Transform screenLayer;
+        [Header("Refs")]
 
-        [FormerlySerializedAs("scopeReticle")] [SerializeField]
+        [SerializeField]
+        private Transform screenLayer;
+
+        [SerializeField]
         private Transform scopeDecal;
 
         [SerializeField]
@@ -19,7 +21,7 @@ namespace Content
         [SerializeField]
         private SpriteRenderer backgroundSprite;
 
-        [FormerlySerializedAs("worldZoom")] [Header("Tuning")] [SerializeField] [Tooltip("스코프 기본 배율")]
+        [Header("Tuning")] [SerializeField] [Tooltip("스코프 기본 배율")]
         private float scopeZoom = 1.0f;
 
         [SerializeField]
