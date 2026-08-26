@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Cysharp.Threading.Tasks;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -74,7 +73,7 @@ namespace Core.StateMachine
         /// </summary>
         public void Run()
         {
-            ActivateState(_currentState).Forget();
+            ActivateState(_currentState).Cancel();
         }
 
         /// <summary>
@@ -99,7 +98,7 @@ namespace Core.StateMachine
                 {
                     // 설계 결함—트랜지션에 정의된 상태가 없음.
                     Assert.True(_states.ContainsKey(nextStateName));
-                    ActivateState(_states[nextStateName]).Forget();
+                    ActivateState(_states[nextStateName]).Cancel();
 
                     return;
                 }
@@ -109,7 +108,7 @@ namespace Core.StateMachine
             {
                 if (!_currentState.StateName.Equals(anyTransitNextStateName))
                 {
-                    ActivateState(_states[anyTransitNextStateName]).Forget();
+                    ActivateState(_states[anyTransitNextStateName]).Cancel();
                 }
             }
         }
@@ -119,7 +118,7 @@ namespace Core.StateMachine
         /// </summary>
         public TStateCategory GetCurrentStateCategory() => _currentState.GetStateCategory();
 
-        private async UniTaskVoid ActivateState(TState state)
+        private async Awaitable ActivateState(TState state)
         {
             // 현재 비동기 작업 취소
             _cancellationTokenHolder.Refresh();

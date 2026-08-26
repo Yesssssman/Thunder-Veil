@@ -6,7 +6,7 @@ namespace Content
     /// <summary>
     /// A single bullet-impact decal. Full opacity for ~120 frames, then a linear fade over
     /// the last 160 (remainTime/160), then it releases itself back to the pool.
-    /// Recycled via UnityEngine.Pool.ObjectPool&lt;Crack&gt; owned by FiringSystem.
+    /// Recycled via UnityEngine.Pool.ObjectPool&lt;Crack&gt; owned by StageScopeController.
     /// </summary>
     [RequireComponent(typeof(SpriteRenderer))]
     public class Crack : MonoBehaviour

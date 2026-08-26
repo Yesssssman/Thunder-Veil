@@ -34,7 +34,7 @@ namespace Content.Character.Soldier
         }
 
         // 다음 지점까지 _moveSpeed만큼 이동한다
-        public async UniTask<SoldierEvent> Enter(Soldier owner, SoldierStateBlackboard blackboard, CancellationTokenHolder cts)
+        public async Awaitable<SoldierEvent> Enter(Soldier owner, SoldierStateBlackboard blackboard, CancellationTokenHolder cts)
         {
             blackboard.Progression = 0.0F;
 

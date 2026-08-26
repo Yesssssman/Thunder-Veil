@@ -1,4 +1,4 @@
-﻿using Cysharp.Threading.Tasks;
+﻿using UnityEngine;
 
 namespace Core.StateMachine
 {
@@ -52,7 +52,7 @@ namespace Core.StateMachine
         /// <returns>
         /// 상태가 종료될 시 전이시킬 이벤트를 리턴함.
         /// </returns>
-        UniTask<TEvent> Enter(TOwner owner, TBlackboard blackboard, CancellationTokenHolder cts);
+        Awaitable<TEvent> Enter(TOwner owner, TBlackboard blackboard, CancellationTokenHolder cts);
 
         /// <summary>
         /// 상태 카테고리를 반환함. 메타데이터 목적으로 사용.

@@ -1,5 +1,6 @@
 ﻿using Core.StateMachine;
 using Cysharp.Threading.Tasks;
+using UnityEngine;
 
 namespace Content.Character.Soldier
 {
@@ -15,7 +16,7 @@ namespace Content.Character.Soldier
             _maxWaitCount = maxWaitCount;
         }
 
-        public async UniTask<SoldierEvent> Enter(Soldier soldier, SoldierStateBlackboard blackboard, CancellationTokenHolder cts)
+        public async Awaitable<SoldierEvent> Enter(Soldier soldier, SoldierStateBlackboard blackboard, CancellationTokenHolder cts)
         {
             // 대기이므로 심플하게 DelayFrame 사용. (cts.Token 필수적으로 넘겨줘야함)
             await UniTask.DelayFrame(_maxWaitCount, PlayerLoopTiming.FixedUpdate, cts.Token);

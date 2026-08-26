@@ -19,7 +19,7 @@ namespace Content.Character.Soldier
         // 총기 발사음을 감지했을 때의 이벤트 델리게이트
         public static event Action GunshotHeard;
 
-        // `FiringSystem`에 의해 호출. 유닛이 총격음 감지시 (천둥 소리가 안 날때 총을 쏘면) 호출됨.
+        // 유닛이 총격음 감지시 (천둥 소리가 안 날때 총을 쏘면) 호출됨.
         public static void RaiseGunshotHeard() => GunshotHeard?.Invoke();
 
         // 시야 내 '죽은 유닛'을 감지하기 위한 필터

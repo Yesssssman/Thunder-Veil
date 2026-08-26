@@ -1,5 +1,6 @@
 ﻿using Core.StateMachine;
 using Cysharp.Threading.Tasks;
+using UnityEngine;
 
 namespace Content.Character.Soldier
 {
@@ -14,7 +15,7 @@ namespace Content.Character.Soldier
             _alertCount = alertCount;
         }
 
-        public async UniTask<SoldierEvent> Enter(Soldier owner, SoldierStateBlackboard blackboard, CancellationTokenHolder cts)
+        public async Awaitable<SoldierEvent> Enter(Soldier owner, SoldierStateBlackboard blackboard, CancellationTokenHolder cts)
         {
             owner.SetAlertSignActive(true);
 

@@ -3,17 +3,11 @@ using Content.Character.Soldier;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.InputSystem;
-using UnityEngine.Serialization;
 
 namespace Content
 {
     /// <summary>
-    /// 게임 로직 중앙 서버 + Input System의 소유자.
-    ///
-    /// Systems 컴포넌트에서 사용
-    ///
-    /// 게임플레이 로직들(사격 재사용 대기시간, AI 상태간 대기 시간 등)은 FixedUpdate에서 관리하며
-    /// 이는 의도된 시간만큼 동작하도록 하기 위함.
+    /// 라운드 당 게임 관리자. 플레이어 입력 처리, 클리어 타임 기록 등.
     /// </summary>
     [DefaultExecutionOrder(-1000)]
     public class GameManager : MonoBehaviour
@@ -53,19 +47,8 @@ namespace Content
         [SerializeField]
         private GameObject resultUI;             // 결과 화면 UI
 
-        [Header("Play area")]
-
-        [Tooltip("따로 설정하지 않을 시 신 내 오브젝트를 찾아 자동 바인딩")]
-        [SerializeField]
-        private SpriteRenderer backgroundRenderer;
-
         // --- 입력 액션 ---
-        public InputAction Look { get; private set; }
-        public InputAction Fire { get; private set; }
-        public InputAction AdjustVolume { get; private set; }
         public InputAction ToggleIndicators { get; private set; }
-
-        public InputAction Zoom { get; private set; }
 
         // --- 전역 게임 상태 Properties ---
         public bool GameEnd { get; private set; }
@@ -95,11 +78,7 @@ namespace Content
 
             if (map != null)
             {
-                Look = map.FindAction("Look", false);
-                Fire = map.FindAction("Fire", false);
-                AdjustVolume = map.FindAction("AdjustVolume", false);
                 ToggleIndicators = map.FindAction("ToggleIndicators", false);
-                Zoom = map.FindAction("Zoom", false);
             }
         }
 
@@ -127,20 +106,16 @@ namespace Content
             Cursor.lockState = CursorLockMode.Locked;
 
             // Volume nudge (was Up/Down arrow -> DirectSound volume in the C++ build).
-            if (AdjustVolume == null) return;
-            float axis = AdjustVolume.ReadValue<float>();
-            if (Mathf.Abs(axis) < 0.01f) return;
 
             if (mixer != null)
             {
-                // Preferred: an AudioMixer exposed parameter named "MasterVolume" (dB).
-                _volumeDb = Mathf.Clamp(_volumeDb + axis * 30f * Time.deltaTime, -40f, 0f);
-                mixer.SetFloat("MasterVolume", _volumeDb);
+                //_volumeDb = Mathf.Clamp(_volumeDb + axis * 30f * Time.deltaTime, -40f, 0f);
+                //mixer.SetFloat("MasterVolume", _volumeDb);
             }
             else
             {
                 // Fallback so volume works with no mixer wired: global listener volume.
-                AudioListener.volume = Mathf.Clamp01(AudioListener.volume + axis * Time.deltaTime);
+                //AudioListener.volume = Mathf.Clamp01(AudioListener.volume + axis * Time.deltaTime);
             }
         }
 
@@ -168,20 +143,28 @@ namespace Content
             Victory();
         }
 
+        // 게임 승리
         public void Victory()
         {
             if (GameEnd) return;
-            GameEnd = true; Win = true;
+
+            GameEnd = true;
+            Win = true;
+
             if (raindropSource != null) raindropSource.Stop();
             if (bgmSource != null) bgmSource.Stop();
             if (sfxSource != null && victoryClip != null) sfxSource.PlayOneShot(victoryClip);
             if (resultUI != null) resultUI.SetActive(true);
         }
 
+        // 게임 패배
         public void Defeated()
         {
             if (GameEnd) return;
-            GameEnd = true; Win = false;
+
+            GameEnd = true;
+            Win = false;
+
             if (raindropSource != null) raindropSource.Stop();
             if (bgmSource != null) bgmSource.Stop();
             if (sfxSource != null && sirenClip != null) sfxSource.PlayOneShot(sirenClip);
