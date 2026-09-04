@@ -814,6 +814,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Stage3Button
       objectReference: {fileID: 0}
+    - target: {fileID: 7601048961241909259, guid: 34c10a8dc5808204191fe51c96240682, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 182192957, guid: c07a9cfa1bf0e7e44a5cef1fb6bafa99, type: 3}
     - target: {fileID: 8604807577072680509, guid: 34c10a8dc5808204191fe51c96240682, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5

@@ -44,7 +44,7 @@ namespace Content.UserInterface
         [SerializeField]
         private GameObject messageScreen;
 
-        public async Awaitable OnEnterPress()
+        public void OnEnterPress()
         {
             TMP_InputField idTextBox = idInputField.GetComponent<TMP_InputField>();
             TMP_InputField pwTextBox = pwInputField.GetComponent<TMP_InputField>();
@@ -62,28 +62,35 @@ namespace Content.UserInterface
 
             loadingScreen.SetActive(true);
 
-            GameUserResponseDTO result = await LoginManager.SignUp(
+            Awaitable<GameUserResponseDTO> result = LoginManager.SignUp(
                 new GameUserRequestDTO
                 {
+                    memberType = 0,
                     memberId = id,
-                    memberPw = pw
+                    memberPw = pw,
+                    memberName = "테스트 유저",
                 }
             );
 
-            loadingScreen.SetActive(false);
-            messageScreen.SetActive(true);
-            var waringScreenBackend = messageScreen.GetComponentInChildren<WarningMessageScreenBackend>();
+            Awaitable<GameUserResponseDTO>.Awaiter awaiter = result.GetAwaiter();
 
-            if (ResponseMessageUtil.IsOk(result.responseMessage))
-            {
-                waringScreenBackend.SetTitleText("Sign Up Succeeded");
-                waringScreenBackend.setMessageText("Log in with your ID and Password");
-            }
-            else
-            {
-                waringScreenBackend.SetTitleText("Sign Up Failed");
-                waringScreenBackend.setMessageText(result.responseMessage);
-            }
+            awaiter.OnCompleted(() => {
+                loadingScreen.SetActive(false);
+                messageScreen.SetActive(true);
+                var waringScreenBackend = messageScreen.GetComponentInChildren<WarningMessageScreenBackend>();
+                GameUserResponseDTO response = awaiter.GetResult();
+
+                if (ResponseMessageUtil.IsOk(response.responseMessage))
+                {
+                    waringScreenBackend.SetTitleText("Sign Up Succeeded");
+                    waringScreenBackend.setMessageText("Log in with your ID and Password");
+                }
+                else
+                {
+                    waringScreenBackend.SetTitleText("Sign Up Failed");
+                    waringScreenBackend.setMessageText(response.responseMessage);
+                }
+            });
         }
 
         public void OnCancelPress()

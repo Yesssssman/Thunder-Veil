@@ -58,7 +58,7 @@ namespace Content.UserInterface
             else
             {
                 waringScreenBackend.SetTitleText("Login Failed");
-                waringScreenBackend.setMessageText("Internal server error!");
+                waringScreenBackend.setMessageText(result.responseMessage);
             }
         }
 
